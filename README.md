@@ -1,8 +1,8 @@
-# Developing Burp Suite Extensions - From Manual Testing to Security Automation
+# Developing Burp Suite Extensions
 
 [![Doyensec](https://www.doyensec.com/images/logo.svg)](https://www.doyensec.com/images/logo.svg)
 
-This repository contains the material for the training *Developing Burp Suite Extensions*
+This repository contains the material for the training *Developing Burp Suite Extensions - From Manual Testing to Security Automation*
 
 # Content
   - **BurpExtensionTemplate** - Empty extension templates for NetBeans, Eclipse and IDEA
