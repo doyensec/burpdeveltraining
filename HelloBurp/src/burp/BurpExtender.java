@@ -1,6 +1,9 @@
 /*
- * Hello Burp! Extension
+ * HelloBurp - A simple extension to show alerts, stdout/stderr and custom UI
+ *
+ * Copyright (c) 2017 Luca Carettoni - Doyensec LLC.
  */
+
 package burp;
 
 import java.awt.Button;

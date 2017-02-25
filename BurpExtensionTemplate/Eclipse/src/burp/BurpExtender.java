@@ -1,5 +1,7 @@
 /*
- * This is an empty Burp Extension - Add here your file header
+ * BurpExtender - This is an empty Burp extension
+ *
+ * Copyright (c) 2017 Luca Carettoni - Doyensec LLC.
  */
 
 package burp;
