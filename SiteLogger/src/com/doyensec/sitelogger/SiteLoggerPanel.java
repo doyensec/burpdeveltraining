@@ -121,8 +121,8 @@ public class SiteLoggerPanel extends javax.swing.JPanel {
             MongoClient mongo = new MongoClient(mongohost.getText(), Integer.parseInt(mongoport.getText()));
             DB db = mongo.getDB("sitelogger");
             URL siteUrl = new URL(website.getText());
-            DBCollection tableSite = db.getCollection(siteUrl.getHost().replaceAll(".", "_") + "_site");
-            DBCollection tableVuln = db.getCollection(siteUrl.getHost().replaceAll(".", "_") + "_vuln");
+            DBCollection tableSite = db.getCollection(siteUrl.getHost().replaceAll("\\.", "_") + "_site");
+            DBCollection tableVuln = db.getCollection(siteUrl.getHost().replaceAll("\\.", "_") + "_vuln");
 
             //Retrieve SiteMap HTTP Requests and Responses and save to the database
             IHttpRequestResponse[] allReqRes = callbacks.getSiteMap(website.getText());
