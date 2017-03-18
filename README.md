@@ -9,7 +9,8 @@ This repository contains the material for the training *Developing Burp Suite Ex
   - **HelloBurp** - Our first Burp extension
   - **SiteLogger** - Log sitemap and findings to database (MongoDB)
   - **ReplayAndDiff** - Replay a scan with a fresh session and diff the results
-  - **DetectSRI** - Passive scanner check to detect the use of Subresource Integrity (SRI)
+  - **DetectSRI** - Passive scanner check to detect the use of Subresource Integrity (SRI) attribute
+  - **DetectELJ** - Active scanner check to detect Expression Language (EL) injection vulnerabilities
 
 ### Overview of the class
 In this hands-on class, attendees will learn how to design and develop Burp Suite extensions for a variety of tasks. In eight hours, we work on several plugins to improve manual security testing efforts as well as to create fully-automated security tools. This workshop is based on real-life use cases where the extension capabilities of the tool can be unleashed to improve efficiency and effectiveness of security auditing. As an attendee, you will bring home a full bag of tricks that will take your web security skills to the next level.

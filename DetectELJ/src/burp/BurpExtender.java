@@ -1,5 +1,5 @@
 /*
- * DetectSRI - A passive scanner extension to detect the use of Subresource Integrity (SRI) within a page
+ * DetectELJ - Active scanner extension to detect Expression Language Injection vulnerabilities
  *
  * Copyright (c) 2017 Luca Carettoni - Doyensec LLC.
  */
@@ -8,9 +8,8 @@ package burp;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class BurpExtender implements IBurpExtender, IScannerCheck {
 
@@ -21,9 +20,9 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks) {
         this.callbacks = callbacks;
         helpers = callbacks.getHelpers();
-        callbacks.setExtensionName("DetectSRI");
+        callbacks.setExtensionName("DetectELJ");
 
-        callbacks.issueAlert("DetectSRI Passive Scanner check enabled");
+        callbacks.issueAlert("DetectELJ Active Scanner check enabled");
 
         PrintWriter stdout = new PrintWriter(callbacks.getStdout(), true);
         PrintWriter stderr = new PrintWriter(callbacks.getStderr(), true);
@@ -33,34 +32,52 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
     @Override
     public List<IScanIssue> doPassiveScan(IHttpRequestResponse ihrr) {
-
-        String response = helpers.bytesToString(ihrr.getResponse());
-        Pattern p = Pattern.compile(".*integrity=\"(sha256|sha384|sha512)-[A-Za-z0-9+/=]+.*", Pattern.DOTALL);
-        Matcher m = p.matcher(response);
-        if (m.matches()) {
-            //The page contains a SRI tag
-            List<IScanIssue> issues = new ArrayList<>(1);
-            issues.add(new SRI(ihrr));
-            return issues;
-        }
-        return null;
+        return null; //Active scanner check only
     }
 
     @Override
     public List<IScanIssue> doActiveScan(IHttpRequestResponse ihrr, IScannerInsertionPoint isip) {
-        return null; //Passive scanner check only
+
+        byte[] withPayload = isip.buildRequest("${1336+1}".getBytes());
+        IHttpRequestResponse newReqRes = callbacks.makeHttpRequest(ihrr.getHttpService(), withPayload);
+
+        IResponseVariations variation = helpers.analyzeResponseVariations(ihrr.getResponse(), newReqRes.getResponse());
+        List<String> pageChanges = variation.getVariantAttributes();
+
+        boolean length = false;
+        boolean bodyContent = false;
+        boolean match = false;
+
+        for (String change : pageChanges) {
+            if (change.equals("content_length")) length = true;
+            if (change.equals("whole_body_content")) bodyContent = true;
+        }
+
+        if (helpers.bytesToString(newReqRes.getResponse()).contains("1337")) match = true;
+
+        if (length && bodyContent && match) {
+            List<IScanIssue> issues = new ArrayList<>(1);
+            issues.add(new ELJ(ihrr));
+            return issues;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public int consolidateDuplicateIssues(IScanIssue isb, IScanIssue isa) {
-        return -1;
+        if (Arrays.equals(isb.getHttpMessages()[0].getResponse(), isa.getHttpMessages()[0].getResponse())) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 
-    class SRI implements IScanIssue {
+    class ELJ implements IScanIssue {
 
         private final IHttpRequestResponse reqres;
 
-        public SRI(IHttpRequestResponse reqres) {
+        public ELJ(IHttpRequestResponse reqres) {
             this.reqres = reqres;
         }
 
@@ -86,7 +103,7 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         @Override
         public String getIssueName() {
-            return "Subresource Integrity (SRI) Detected";
+            return "Expression Language (EL) Injection Detected";
         }
 
         @Override
@@ -96,30 +113,30 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         @Override
         public String getSeverity() {
-            return "Information"; // "High", "Medium", "Low", "Information" or "False positive"
+            return "High"; // "High", "Medium", "Low", "Information" or "False positive"
         }
 
         @Override
         public String getConfidence() {
-            return "Certain"; //"Certain", "Firm" or "Tentative"
+            return "Firm"; //"Certain", "Firm" or "Tentative"
         }
 
         @Override
         public String getIssueBackground() {
-            return "Subresource Integrity (SRI) is a security feature that enables "
-                    + "browsers to verify that files they fetch (for example, from a CDN) "
-                    + "are delivered without unexpected manipulation. It works by allowing"
-                    + "you to provide a cryptographic hash that a fetched file must match.";
+            return "Expression Language injections occur when input data is evaluated "
+                    + "by an expression language interpreter. An attacker can read server-side "
+                    + "data, such as the content of server-side variables, and some other inner "
+                    + "configuration details.";
         }
 
         @Override
         public String getRemediationBackground() {
-            return "This is an <b>informational</b> finding only.<br>";
+            return "Apply input validation best practices, and reject ${, #{ and other variations.";
         }
 
         @Override
         public String getIssueDetail() {
-            return "Burp Scanner has identified Subresource Integrity (SRI) in the following page: <b>"
+            return "Burp Scanner has identified an Expression Language injection in:<b>"
                     + reqres.getUrl().toString() + "</b><br><br>";
         }
 
