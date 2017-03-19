@@ -2,7 +2,7 @@
 
 [![Doyensec](https://www.doyensec.com/images/logo.svg)](https://www.doyensec.com/images/logo.svg)
 
-This repository contains the material for the training *Developing Burp Suite Extensions - From Manual Testing to Security Automation*
+This repository contains the templates and code for the training *Developing Burp Suite Extensions - From Manual Testing to Security Automation*
 
 # Content
   - **BurpExtensionTemplate** - Empty extension templates for NetBeans, Eclipse and IDEA
@@ -17,4 +17,5 @@ In this hands-on class, attendees will learn how to design and develop Burp Suit
 ### Audience
 Suitable for both web application security specialists and developers. Attendees are expected to have rudimental understanding of Burp Suite as well as basic object-oriented programming experience (Burp Extensions will be developed in Java).
 ### Interested?
-We deliver this class during public events (e.g. security conferences) as well as private company workshops. If you're interested in forthcoming public training or you want to know more about private classes, please contact info@doyensec.com
+More details on what to expect from this class can be found on our [blog post](https://blog.doyensec.com/2017/03/02/training-burp.html).
+We deliver this class during public events (e.g. security conferences) as well as private company workshops. If you're interested in a forthcoming public training or you want to know more about private classes, please contact info@doyensec.com

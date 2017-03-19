@@ -130,7 +130,8 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         @Override
         public IHttpRequestResponse[] getHttpMessages() {
-            return null;
+            IHttpRequestResponse[] rra = { reqres };
+            return rra;
         }
 
         @Override

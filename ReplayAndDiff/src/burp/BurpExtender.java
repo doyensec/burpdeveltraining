@@ -22,10 +22,12 @@ import java.util.Iterator;
  */
 public class BurpExtender implements IBurpExtender {
 
-    //Configuration
-    static final String MONGO_HOST = "127.0.0.1";
-    static final int MONGO_PORT = 27017;
-    static final String REPORT_DIR = "/tmp/";
+    //Default configuration
+    static String MONGO_HOST = "127.0.0.1";
+    static int MONGO_PORT = 27017;
+    static String OUTPUT_DIR = "/tmp/";
+    static String REPORT_NAME = "burpreport_" + System.currentTimeMillis() + ".html";
+    static int TIMEOUT = 10; //seconds
 
     private IBurpExtenderCallbacks callbacks;
     private IExtensionHelpers helpers;
@@ -38,6 +40,24 @@ public class BurpExtender implements IBurpExtender {
 
         callbacks.setExtensionName("ReplayAndDiff");
         System.out.println("\n\n:: ReplayAndDiff Headless Extension ::\n\n");
+        
+        //Parse command line arguments
+        //-h|--host=<IP>, -p|--port=<port>, -o|--ouput=<dir>
+        String[] args = callbacks.getCommandLineArguments();
+        for (String arg: args) {           
+            if(arg.contains("-h=") || arg.contains("--host=")){
+                MONGO_HOST = arg.substring(arg.indexOf('=')+1);
+            }else if(arg.contains("-p=") || arg.contains("--port=")){
+                MONGO_PORT = Integer.valueOf(arg.substring(arg.indexOf('=')+1));
+            }else if(arg.contains("-o=") || arg.contains("--ouput=")){
+                OUTPUT_DIR = arg.substring(arg.indexOf('=')+1);
+            }else if(arg.contains("-r=") || arg.contains("--report=")){
+                REPORT_NAME = arg.substring(arg.indexOf('=')+1);
+            }else if(arg.contains("-t=") || arg.contains("--timeout=")){
+                TIMEOUT = Integer.valueOf(arg.substring(arg.indexOf('=')+1));
+            }
+        }
+        System.out.println("[*] Configuration {MONGO_HOST="+MONGO_HOST +",MONGO_PORT="+MONGO_PORT+",OUTPUT_DIR="+OUTPUT_DIR+",REPORT_NAME="+REPORT_NAME+",TIMEOUT="+TIMEOUT+"}");
 
         //Retrieve site info and login request from MongoDB
         MongoClient mongo = null;
@@ -99,7 +119,7 @@ public class BurpExtender implements IBurpExtender {
         try {
             System.out.println("[*] Pausing extension...");
             // HOMEWORK - Build a queuing system to check scans status and confirm once all scans are done
-            Thread.sleep(10000);
+            Thread.sleep(1000*TIMEOUT);
             System.out.println("[*] Resuming extension...");
         } catch (InterruptedException ex) {
             System.err.println("[!] InterruptedException: " + ex.toString());
@@ -131,7 +151,7 @@ public class BurpExtender implements IBurpExtender {
 
             if (newFinding) {
                 System.out.println("[*] New findings! Generating report...");
-                callbacks.generateScanReport("HTML", allVulns, new File(REPORT_DIR + host.replaceAll("\\.", "_") + System.currentTimeMillis() + ".html"));
+                callbacks.generateScanReport("HTML", allVulns, new File(OUTPUT_DIR + REPORT_NAME));
             } else {
                 System.out.println("[*] Scan and diff completed. No new results.");
             }

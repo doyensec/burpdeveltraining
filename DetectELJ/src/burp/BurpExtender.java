@@ -57,7 +57,7 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         if (length && bodyContent && match) {
             List<IScanIssue> issues = new ArrayList<>(1);
-            issues.add(new ELJ(ihrr));
+            issues.add(new ELJ(newReqRes));
             return issues;
         } else {
             return null;
@@ -147,7 +147,16 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         @Override
         public IHttpRequestResponse[] getHttpMessages() {
-            return null;
+            //Let's highlight the specific string in the response that triggered the issue
+            String strRes = helpers.bytesToString(reqres.getResponse());
+            int[] marks = new int[2];
+            marks[0] = strRes.indexOf("1337");
+            marks[1] = marks[0] + 4;
+            List<int[]> marksList = new ArrayList<>(1);
+            marksList.add(marks);
+            IHttpRequestResponseWithMarkers reqresMark = callbacks.applyMarkers(reqres, null, marksList);
+            IHttpRequestResponse[] rra = { reqresMark };
+            return rra;
         }
 
         @Override
