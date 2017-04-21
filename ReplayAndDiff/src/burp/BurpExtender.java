@@ -40,24 +40,24 @@ public class BurpExtender implements IBurpExtender {
 
         callbacks.setExtensionName("ReplayAndDiff");
         System.out.println("\n\n:: ReplayAndDiff Headless Extension ::\n\n");
-        
+
         //Parse command line arguments
         //-h|--host=<IP>, -p|--port=<port>, -o|--ouput=<dir>
         String[] args = callbacks.getCommandLineArguments();
-        for (String arg: args) {           
-            if(arg.contains("-h=") || arg.contains("--host=")){
-                MONGO_HOST = arg.substring(arg.indexOf('=')+1);
-            }else if(arg.contains("-p=") || arg.contains("--port=")){
-                MONGO_PORT = Integer.valueOf(arg.substring(arg.indexOf('=')+1));
-            }else if(arg.contains("-o=") || arg.contains("--ouput=")){
-                OUTPUT_DIR = arg.substring(arg.indexOf('=')+1);
-            }else if(arg.contains("-r=") || arg.contains("--report=")){
-                REPORT_NAME = arg.substring(arg.indexOf('=')+1);
-            }else if(arg.contains("-t=") || arg.contains("--timeout=")){
-                TIMEOUT = Integer.valueOf(arg.substring(arg.indexOf('=')+1));
+        for (String arg : args) {
+            if (arg.contains("-h=") || arg.contains("--host=")) {
+                MONGO_HOST = arg.substring(arg.indexOf('=') + 1);
+            } else if (arg.contains("-p=") || arg.contains("--port=")) {
+                MONGO_PORT = Integer.valueOf(arg.substring(arg.indexOf('=') + 1));
+            } else if (arg.contains("-o=") || arg.contains("--ouput=")) {
+                OUTPUT_DIR = arg.substring(arg.indexOf('=') + 1);
+            } else if (arg.contains("-r=") || arg.contains("--report=")) {
+                REPORT_NAME = arg.substring(arg.indexOf('=') + 1);
+            } else if (arg.contains("-t=") || arg.contains("--timeout=")) {
+                TIMEOUT = Integer.valueOf(arg.substring(arg.indexOf('=') + 1));
             }
         }
-        System.out.println("[*] Configuration {MONGO_HOST="+MONGO_HOST +",MONGO_PORT="+MONGO_PORT+",OUTPUT_DIR="+OUTPUT_DIR+",REPORT_NAME="+REPORT_NAME+",TIMEOUT="+TIMEOUT+"}");
+        System.out.println("[*] Configuration {MONGO_HOST=" + MONGO_HOST + ",MONGO_PORT=" + MONGO_PORT + ",OUTPUT_DIR=" + OUTPUT_DIR + ",REPORT_NAME=" + REPORT_NAME + ",TIMEOUT=" + TIMEOUT + "}");
 
         //Retrieve site info and login request from MongoDB
         MongoClient mongo = null;
@@ -106,8 +106,20 @@ public class BurpExtender implements IBurpExtender {
                 callbacks.includeInScope(website);
 
                 //Execute passive and active scans
-                callbacks.doActiveScan(((String) entry.get("host")), ((int) entry.get("port")), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")));
-                callbacks.doPassiveScan(((String) entry.get("host")), ((int) entry.get("port")), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")), b64d((String) entry.get("response")));
+                IScanQueueItem item = callbacks.doActiveScan(((String) entry.get("host")), ((int) entry.get("port")), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")));
+                System.out.println(item.getStatus());
+                System.out.println(item.getPercentageComplete());
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException ex) {
+                    System.err.println("[!] InterruptedException: " + ex.toString());
+                }
+                System.out.println(item.getStatus());
+                System.out.println(item.getPercentageComplete());
+
+                //Make a new HTTP request and pass request/response to Burp's passive scanner
+                byte[] response = callbacks.makeHttpRequest(((String) entry.get("host")), ((Double) entry.get("port")).intValue(), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")));
+                callbacks.doPassiveScan(((String) entry.get("host")), ((int) entry.get("port")), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")), response);
 
             } catch (MalformedURLException ex) {
                 System.err.println("[!] Malformed website URL: " + ex.toString());
@@ -119,7 +131,7 @@ public class BurpExtender implements IBurpExtender {
         try {
             System.out.println("[*] Pausing extension...");
             // HOMEWORK - Build a queuing system to check scans status and confirm once all scans are done
-            Thread.sleep(1000*TIMEOUT);
+            Thread.sleep(1000 * TIMEOUT);
             System.out.println("[*] Resuming extension...");
         } catch (InterruptedException ex) {
             System.err.println("[!] InterruptedException: " + ex.toString());

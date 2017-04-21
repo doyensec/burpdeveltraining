@@ -1,5 +1,5 @@
 /*
- * DetectSRI - A passive scanner extension to detect the use of Subresource Integrity (SRI) within a page
+ * DetectSRI - A passive scanner extension to detect missing Subresource Integrity (SRI) within a page
  *
  * Copyright (c) 2017 Luca Carettoni - Doyensec LLC.
  */
@@ -37,8 +37,9 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
         String response = helpers.bytesToString(ihrr.getResponse());
         Pattern p = Pattern.compile(".*integrity=\"(sha256|sha384|sha512)-[A-Za-z0-9+/=]+.*", Pattern.DOTALL);
         Matcher m = p.matcher(response);
-        if (m.matches()) {
-            //The page contains a SRI tag
+        //Check match for html pages only
+        if (response.contains("<html") && !m.matches()) {
+            //The page does NOT contain any SRI attribute
             List<IScanIssue> issues = new ArrayList<>(1);
             issues.add(new SRI(ihrr));
             return issues;
@@ -86,7 +87,7 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         @Override
         public String getIssueName() {
-            return "Subresource Integrity (SRI) Detected";
+            return "Subresource Integrity (SRI) Missing";
         }
 
         @Override
@@ -119,7 +120,7 @@ public class BurpExtender implements IBurpExtender, IScannerCheck {
 
         @Override
         public String getIssueDetail() {
-            return "Burp Scanner has identified Subresource Integrity (SRI) in the following page: <b>"
+            return "Burp Scanner has not identified Subresource Integrity (SRI) attributes in the following page: <b>"
                     + reqres.getUrl().toString() + "</b><br><br>";
         }
 
