@@ -41,8 +41,8 @@ public class BurpExtender implements IBurpExtender {
         callbacks.setExtensionName("ReplayAndDiff");
         System.out.println("\n\n:: ReplayAndDiff Headless Extension ::\n\n");
 
-        //Parse command line arguments and store values in local variables
-        //-h|--host=<IP>, -p|--port=<port>, -o|--ouput=<dir>, -e|--report=<filename>, -t|--timeout=<seconds>
+        // 1 - Parse command line arguments and store values in local variables
+        // -h|--host=<IP>, -p|--port=<port>, -o|--ouput=<dir>, -e|--report=<filename>, -t|--timeout=<seconds>
         String[] args = callbacks.getCommandLineArguments();
         for (String arg : args) {
             if (arg.contains("-h=") || arg.contains("--host=")) {
@@ -59,7 +59,7 @@ public class BurpExtender implements IBurpExtender {
         }
         System.out.println("[*] Configuration {MONGO_HOST=" + MONGO_HOST + ",MONGO_PORT=" + MONGO_PORT + ",OUTPUT_DIR=" + OUTPUT_DIR + ",REPORT_NAME=" + REPORT_NAME + ",TIMEOUT=" + TIMEOUT + "}");
 
-        //Retrieve site info and login request from MongoDB
+        // 2 - Connect to MongoDB
         MongoClient mongo = null;
         try {
             mongo = new MongoClient(MONGO_HOST, MONGO_PORT);
@@ -67,30 +67,23 @@ public class BurpExtender implements IBurpExtender {
             System.err.println("[!] MongoDB Connection Error: " + ex.toString());
         }
 
+        // 3 - Retrieve login requests from the 'login' collection in db 'sitelogger'
         DB db = mongo.getDB("sitelogger");
         DBCollection table = db.getCollection("login");
         DBCursor cursor = table.find();
 
+
         String host = null;
         while (cursor.hasNext()) {
-            DBObject entry = cursor.next();
-            //Replay the HTTP request and save the fresh cookie in Burp's Cookies JAR
-            host = (String) entry.get("host");
-            System.out.println("[*] Retrieving record for: " + host);
-            byte[] response = callbacks.makeHttpRequest(host, ((Double) entry.get("port")).intValue(), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")));
-            Iterator<ICookie> cookies = helpers.analyzeResponse(response).getCookies().iterator();
-            while (cookies.hasNext()) {
-                try {
-                    ICookie cookie = cookies.next();
-                    System.out.println("[*] Obtained cookie: " + cookie.getName() + ":" + cookie.getValue());
-                    callbacks.updateCookieJar(cookie);
-                } catch (NullPointerException npe) {
-                    System.out.println("[!] Missing cookie attributes - e.g. domain not set");
-                }
-            }
+
+            // 4 - For each entry, issue a new HTTP request (using Burp's makeHttpRequest) and collect the cookies (using Burp's analyzeResponse)
+            
+            // 5 - If there are cookies, update Burp's Cookies jar (using Burp's updateCookieJar)
+            
+            // TODO
         }
 
-        //Replay a scan on all URLs previously saved for the same site
+        // 6 - Retrieve from the database all previously saved HTTP requests
         if (host != null) {
             table = db.getCollection(host.replaceAll("\\.", "_") + "_site");
         } else {
@@ -99,35 +92,15 @@ public class BurpExtender implements IBurpExtender {
         cursor = table.find();
         URL website = null;
         while (cursor.hasNext()) {
-            DBObject entry = cursor.next();
-            //Add host in scope. This is meant to prevent popup since the extension is running headless
-            try {
-                website = new URL(((String) entry.get("protocol")) + "://" + ((String) entry.get("host")));
-                callbacks.includeInScope(website);
 
-                //Execute passive and active scans
-                IScanQueueItem item = callbacks.doActiveScan(((String) entry.get("host")), ((int) entry.get("port")), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")));
-                System.out.println(item.getStatus());
-                System.out.println(item.getPercentageComplete());
-                try {
-                    Thread.sleep(4000);
-                } catch (InterruptedException ex) {
-                    System.err.println("[!] InterruptedException: " + ex.toString());
-                }
-                System.out.println(item.getStatus());
-                System.out.println(item.getPercentageComplete());
+            // 7 - Trigger a new active scan on the same URL (using Burp's doActiveScan)
 
-                //Make a new HTTP request and pass request/response to Burp's passive scanner
-                byte[] response = callbacks.makeHttpRequest(((String) entry.get("host")), ((Double) entry.get("port")).intValue(), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")));
-                callbacks.doPassiveScan(((String) entry.get("host")), ((int) entry.get("port")), "https".equals((String) entry.get("protocol")), b64d((String) entry.get("request")), response);
+            // 8 - Reissue a new HTTP request and trigger a new passive scan on the same URL (using Burp's doPassiveScan)
 
-            } catch (MalformedURLException ex) {
-                System.err.println("[!] Malformed website URL: " + ex.toString());
-            } catch (NullPointerException ex) {
-                System.err.println("[!] Missing request or response: " + ex.toString());
-            }
+            // TODO
         }
 
+        // 9 - Wait until all scans are completed
         try {
             System.out.println("[*] Pausing extension...");
             // HOMEWORK - Build a queuing system to check scans status and confirm once all scans are done
@@ -142,12 +115,13 @@ public class BurpExtender implements IBurpExtender {
         IScanIssue[] allVulns = null;
         boolean newFinding = false;
 
-        //Obtain the new scan findings
+        // 10 - Obtain the list of new findings (using Burp's getScanIssues)
         if (website != null) {
             allVulns = callbacks.getScanIssues(website.toString());
 
             for (IScanIssue allVuln : allVulns) {
-                //Diff new and old scan results.
+                // 11 - Diff old and new findings
+                // For now, let's use a simple heuristic: if there's at least a new finding (not previously reported), success!
                 searchQuery = new BasicDBObject();
                 searchQuery.put("type", allVuln.getIssueType());
                 searchQuery.put("name", allVuln.getIssueName());
@@ -161,26 +135,15 @@ public class BurpExtender implements IBurpExtender {
                 }
             }
 
+            // 12 - In case of new findings, generate the report (using Burp's generateScanReport)
             if (newFinding) {
-                System.out.println("[*] New findings! Generating report...");
-                callbacks.generateScanReport("HTML", allVulns, new File(OUTPUT_DIR + REPORT_NAME));
-            } else {
-                System.out.println("[*] Scan and diff completed. No new results.");
-            }
+                // TODO
+            } 
 
         } else {
             throw new NullPointerException();
         }
         System.out.println("[*] Ready to shutdown...Bye!");
         callbacks.exitSuite(false);
-    }
-
-    /* Utility method to Base64 decode */
-    private byte[] b64d(String input) {
-
-        if (input != null) {
-            return helpers.base64Decode(input);
-        }
-        return new byte[0];
     }
 }
