@@ -34,7 +34,7 @@ public final class BradamsaPanel extends javax.swing.JPanel {
                 + "<br>The current version supports <u>sniper</u> attack type only!</html>", ":: Welcome to Bradamsa ::", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    // Java Swing UI code here
+    // Java Swing UI code HERE
 
     /*
      * Validate and return Radamsa command line 
@@ -67,82 +67,8 @@ public final class BradamsaPanel extends javax.swing.JPanel {
             cmdline.setText("Count option is not 'number'");
             return "";
         }
-        //Output directory - mandatory
-        if (validateOutput()) {
-            output.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102), 2));
-            cmdline.setForeground(new java.awt.Color(0, 153, 102));
-            cmdSB.append(" -o ");
-            cmdSB.append(output.getText().toLowerCase().trim());
-        } else {
-            output.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 0, 0), 2));
-            cmdline.setForeground(new java.awt.Color(240, 0, 0));
-            cmdline.setText("Missing output directory or incorrect permissions");
-            return "";
-        }
-        //Seed - optional
-        if (validateSeed()) {
-            if (!seed.getText().toLowerCase().trim().isEmpty()) {
-                seed.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102), 2));
-                cmdline.setForeground(new java.awt.Color(0, 153, 102));
-                cmdSB.append(" -s ");
-                cmdSB.append(seed.getText().toLowerCase().trim());
-            } else {
-                seed.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153), 2));
-            }
-        } else {
-            seed.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 0, 0), 2));
-            cmdline.setForeground(new java.awt.Color(240, 0, 0));
-            cmdline.setText("Seed is not 'number'");
-            return "";
-        }
-        //Mutations - optional
-        if (validateMutations()) {
-            if (!mutations.getText().toLowerCase().trim().isEmpty()) {
-                mutations.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102), 2));
-                cmdline.setForeground(new java.awt.Color(0, 153, 102));
-                cmdSB.append(" -m ");
-                cmdSB.append(mutations.getText().toLowerCase().trim());
-            } else {
-                mutations.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153), 2));
-            }
-        } else {
-            mutations.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 0, 0), 2));
-            cmdline.setForeground(new java.awt.Color(240, 0, 0));
-            cmdline.setText("Invalid mutations [ft=2,fo=2,fn,num=3,td,tr2,ts1,tr,ts2,ld,lr2,li,ls,lp,lr,sr,bd,bf,bi,br,bp,bei,bed,ber,uw,ui]");
-            return "";
-        }
-        //Patterns - optional
-        if (validatePatterns()) {
-            if (!patterns.getText().toLowerCase().trim().isEmpty()) {
-                patterns.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102), 2));
-                cmdline.setForeground(new java.awt.Color(0, 153, 102));
-                cmdSB.append(" -p ");
-                cmdSB.append(patterns.getText().toLowerCase().trim());
-            } else {
-                patterns.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153), 2));
-            }
-        } else {
-            patterns.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 0, 0), 2));
-            cmdline.setForeground(new java.awt.Color(240, 0, 0));
-            cmdline.setText("Invalid mutations pattern [od,nd,bu]");
-            return "";
-        }
-        //Meta - optional
-        if (validateMeta()) {
-            if (!meta.getText().toLowerCase().trim().isEmpty()) {
-                meta.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 102), 2));
-                cmdline.setForeground(new java.awt.Color(0, 153, 102));
-                cmdSB.append(" -M ");
-                cmdSB.append(meta.getText().toLowerCase().trim());
-            } else {
-                meta.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153), 2));
-            }
-        } else {
-            meta.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(240, 0, 0), 2));
-            cmdline.setForeground(new java.awt.Color(240, 0, 0));
-            cmdline.setText("Missing metadata directory or incorrect permissions");
-            return "";
-        }
+
+        //Other command line validation and display HERE
 
         cmdline.setText(cmdSB.toString());
         return cmdSB.toString();
@@ -167,41 +93,6 @@ public final class BradamsaPanel extends javax.swing.JPanel {
         return true;
     }
 
-    protected boolean validateOutput() {
-
-        String outputStr = output.getText().toLowerCase().trim();
-        if (outputStr.isEmpty()) {
-            return false;
-        }
-
-        File f = new File(outputStr.substring(0, outputStr.lastIndexOf(File.separatorChar)));
-        return f.exists() && f.isDirectory();
-    }
-
-    protected boolean validateSeed() {
-
-        if (seed.getText().toLowerCase().trim().isEmpty()) {
-            return true;
-        }
-
-        try {
-            Long.valueOf(seed.getText().toLowerCase().trim());
-        } catch (NumberFormatException numExc) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected boolean validateMutations() {
-
-        if (mutations.getText().toLowerCase().trim().isEmpty()) {
-            return true;
-        }
-
-        return Pattern.matches("(\\p{Alnum}+)(=\\p{Digit}+)?(,(\\p{Alnum}+)(=\\p{Digit}+)?)*", mutations.getText().toLowerCase().trim());
-    }
-
     protected boolean validatePatterns() {
 
         if (patterns.getText().toLowerCase().trim().isEmpty()) {
@@ -211,24 +102,8 @@ public final class BradamsaPanel extends javax.swing.JPanel {
         return Pattern.matches("(od|nd|bu)+(,(od|nd|bu))*", patterns.getText().toLowerCase().trim());
     }
 
-    protected boolean validateMeta() {
 
-        String metaStr = meta.getText().toLowerCase().trim();
-        if (metaStr.isEmpty()) {
-            return true;
-        }
-
-        if (!metaStr.contains(String.valueOf(File.separatorChar))) {
-            return false;
-        }
-        
-        if (metaStr.charAt(metaStr.length()-1) == File.separatorChar) {
-            return false;
-        }
-
-        File f = new File(metaStr.substring(0, metaStr.lastIndexOf(File.separatorChar)));
-        return f.exists() && f.isDirectory();
-    }
+    //Other validation methods HERE
 
     protected File getOutputDir() {
 

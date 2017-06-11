@@ -18,6 +18,8 @@ public class BurpUtils {
 
     /*
      * Retrieve the HTTP message body from a request/response
+     * 
+     * With the recent Burp's Extender API, you can use analyzeRequest() and analyzeResponse() instead
      */
     public static byte[] getBody(byte[] request) {
 
@@ -45,6 +47,8 @@ public class BurpUtils {
 
     /*
      * Retrieve the cookies header field from a request/response
+     * 
+     * With the recent Burp's Extender API, you can use analyzeRequest() and analyzeResponse() instead
      */
     public static String getCookies(byte[] request) {
 
@@ -60,6 +64,8 @@ public class BurpUtils {
 
     /*
      * Retrieve the host header field from a request/response
+     * 
+     * With the recent Burp's Extender API, you can use analyzeRequest() and analyzeResponse() instead
      */
     public static String getHost(byte[] request) {
 
