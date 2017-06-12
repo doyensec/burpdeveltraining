@@ -1,7 +1,7 @@
 /*
  * BurpExtender - This is an empty Burp extension
  *
- * Copyright (c) 2017 Luca Carettoni - Doyensec LLC.
+ * Copyright (c) 2017 Doyensec LLC. Made with love by Luca Carettoni.
  */
 
 package burp;
