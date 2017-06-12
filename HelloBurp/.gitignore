@@ -19,7 +19,7 @@ lib/*
 manifest.mf
 .jacocoverage/
 coverage/
-src/*
+src/
 
 #java specific
 *.class
