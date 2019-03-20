@@ -15,6 +15,8 @@ This repository contains the templates and code for the training *Developing Bur
 
 All exercises are provided in *Java*, *Python* and *Ruby*. 
 
+This work is licensed under the Creative Commons **Attribution-NonCommercial-ShareAlike** 3.0 Unported (CC BY-NC-SA 3.0). You are free to **Share** and **Adapt** under the following terms: **Attribution**, **NonCommercial**, **ShareAlike**.
+
 ### Overview of the class
 In this hands-on class, attendees will learn how to design and develop Burp Suite extensions for a variety of tasks. In a few hours, we work on several plugins to improve manual security testing efforts as well as to create fully-automated security tools. This workshop is based on real-life use cases where the extension capabilities of the tool can be unleashed to improve efficiency and effectiveness of security auditing. As an attendee, you will bring home a full bag of tricks that will take your web security skills to the next level. The class is available in 1-day and 2-days versions.
 ### Audience
