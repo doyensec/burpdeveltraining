@@ -12,6 +12,7 @@ This repository contains the slides and code for the training *Developing Burp S
   - **DetectSRI** - Passive scanner check to detect the use of Subresource Integrity (SRI) attribute
   - **DetectELJ** - Active scanner check to detect Expression Language (EL) injection vulnerabilities
   - **Bradamsa** - Simplified code of [Bradansa Intruder payloads generator](https://github.com/ikkisoft/bradamsa)
+  - **Doyensec_DevelopingBurpSuiteExtensionsTraining.pdf** - Full slides of the training (PDF, 155 pages)
 
 All exercises are provided in *Java*, *Python* and *Ruby*. 
 
