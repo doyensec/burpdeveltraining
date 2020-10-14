@@ -2,7 +2,7 @@
 
 [![Doyensec](https://www.doyensec.com/images/logo.svg)](https://www.doyensec.com/images/logo.svg)
 
-This repository contains the templates and code for the training *Developing Burp Suite Extensions - From Manual Testing to Security Automation*
+This repository contains the slides and code for the training *Developing Burp Suite Extensions - From Manual Testing to Security Automation*
 
 # Content
   - **BurpExtensionTemplate** - Empty extension templates for NetBeans, Eclipse and IDEA
